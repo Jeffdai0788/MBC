@@ -12,6 +12,7 @@ export default function TraderDashboard() {
     const { publicKey } = useWallet();
     const [stats, setStats] = useState<MarketplaceStats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [userStrategies, setUserStrategies] = useState<any[]>([]);
 
     // Comparison State
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -28,6 +29,7 @@ export default function TraderDashboard() {
 
     useEffect(() => {
         fetchData();
+        loadUserStrategies();
     }, []);
 
     const fetchData = async () => {
@@ -43,6 +45,18 @@ export default function TraderDashboard() {
         }
     };
 
+    const loadUserStrategies = () => {
+        try {
+            const stored = localStorage.getItem('userCreatedStrategies');
+            if (stored) {
+                const strategies = JSON.parse(stored);
+                setUserStrategies(strategies);
+            }
+        } catch (e) {
+            console.error('Error loading user strategies:', e);
+        }
+    };
+
     const toggleSelection = (id: string, selected: boolean) => {
         if (selected) {
             if (selectedIds.length >= 4) {
@@ -55,11 +69,12 @@ export default function TraderDashboard() {
         }
     };
 
-    const selectedStrategies = mockStrategies.filter(s => selectedIds.includes(s.id));
+    const allStrategies = [...mockStrategies, ...userStrategies];
+    const selectedStrategies = allStrategies.filter(s => selectedIds.includes(s.id));
 
     // Filter and Sort Logic
     const filteredStrategies = useMemo(() => {
-        let result = [...mockStrategies];
+        let result = [...allStrategies];
 
         // 1. Search
         if (filters.search) {
@@ -102,7 +117,7 @@ export default function TraderDashboard() {
         });
 
         return result;
-    }, [filters]);
+    }, [filters, userStrategies]);
 
     return (
         <div>
@@ -118,7 +133,7 @@ export default function TraderDashboard() {
             {/* Stats */}
             <div className="stats-row">
                 <div className="stat-item">
-                    <div className="stat-value">{mockStrategies.length}</div>
+                    <div className="stat-value">{allStrategies.length}</div>
                     <div className="stat-label">Total Strategies</div>
                 </div>
                 <div className="stat-item">
