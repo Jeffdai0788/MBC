@@ -73,7 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             />
                             <span className="nav-partner-divider">×</span>
                             <img
-                                src="/images/solana-gradient.png"
+                                src="/images/solana.png"
                                 alt="Solana"
                                 height={24}
                                 style={{ height: "24px", width: "auto" }}

@@ -10,7 +10,7 @@ import StrategyCard from "../../components/StrategyCard";
 import { useProfileBrowser } from "../../hooks/useProfileBrowser";
 import { mockStrategies } from "../../lib/mockStrategyData"; // Using mock data for now
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+const SERVER_URL = ""; // Use relative paths for Next.js API routes
 
 interface UserProfile {
     walletAddress: string;

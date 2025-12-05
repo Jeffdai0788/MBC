@@ -14,6 +14,7 @@ export default function TraderDashboard() {
     const [stats, setStats] = useState<MarketplaceStats | null>(null);
     const [strategies, setStrategies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userStrategies, setUserStrategies] = useState<any[]>([]);
 
     // Profile State
     const [showProfileModal, setShowProfileModal] = useState(false);
@@ -132,6 +133,18 @@ export default function TraderDashboard() {
             setStrategies([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadUserStrategies = () => {
+        try {
+            const stored = localStorage.getItem('userCreatedStrategies');
+            if (stored) {
+                const strategies = JSON.parse(stored);
+                setUserStrategies(strategies);
+            }
+        } catch (e) {
+            console.error('Error loading user strategies:', e);
         }
     };
 
