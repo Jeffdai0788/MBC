@@ -76,7 +76,7 @@ export class StrategyTransactions {
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
                 rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-            })
+            } as any)
             .transaction();
 
         return { transaction: tx, strategyPda, strategyMint };
@@ -106,7 +106,7 @@ export class StrategyTransactions {
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
-            })
+            } as any)
             .transaction();
 
         return { transaction: tx };
@@ -143,7 +143,7 @@ export class StrategyTransactions {
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
-            })
+            } as any)
             .transaction();
 
         return { transaction: tx };
@@ -168,7 +168,7 @@ export class StrategyTransactions {
                 sellerNftAta,
                 escrowNftAta,
                 tokenProgram: TOKEN_PROGRAM_ID,
-            })
+            } as any)
             .transaction();
 
         return { transaction: tx };
