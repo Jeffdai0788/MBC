@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useConnection, useWallet, useAnchorWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
 import { StrategyTransactions, CreateStrategyParams, ListStrategyParams, BuyStrategyParams } from "../lib/transactions/strategyTransactions";
 
 export interface TransactionState {
@@ -31,6 +30,17 @@ export function useStrategyTransactions() {
             const signature = await txBuilder.sendTransaction(transaction);
 
             setCreateState({ loading: false, error: null, signature });
+
+            // Log transaction to explorer
+            window.dispatchEvent(new CustomEvent("newTransaction", {
+                detail: {
+                    signature,
+                    timestamp: Date.now(),
+                    action: "Create Strategy NFT",
+                    status: "success"
+                }
+            }));
+
             return { signature, strategyPda: strategyPda.toBase58(), strategyMint: strategyMint.toBase58() };
         } catch (error: any) {
             const errorMsg = error.message || "Transaction failed";
@@ -52,6 +62,17 @@ export function useStrategyTransactions() {
             const signature = await txBuilder.sendTransaction(transaction);
 
             setBuyState({ loading: false, error: null, signature });
+
+            // Log transaction to explorer
+            window.dispatchEvent(new CustomEvent("newTransaction", {
+                detail: {
+                    signature,
+                    timestamp: Date.now(),
+                    action: "Buy Strategy",
+                    status: "success"
+                }
+            }));
+
             return { signature };
         } catch (error: any) {
             const errorMsg = error.message || "Purchase failed";
@@ -73,6 +94,17 @@ export function useStrategyTransactions() {
             const signature = await txBuilder.sendTransaction(transaction);
 
             setListState({ loading: false, error: null, signature });
+
+            // Log transaction to explorer
+            window.dispatchEvent(new CustomEvent("newTransaction", {
+                detail: {
+                    signature,
+                    timestamp: Date.now(),
+                    action: "List Strategy",
+                    status: "success"
+                }
+            }));
+
             return { signature };
         } catch (error: any) {
             const errorMsg = error.message || "Listing failed";
