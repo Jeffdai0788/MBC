@@ -2,8 +2,8 @@ import * as anchor from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from "@solana/spl-token";
-import idl from "../anchor/idl/strategy_marketplace.json";
-import { StrategyMarketplace } from "../anchor/types/strategy_marketplace";
+import idl from "../../anchor/idl/strategy_marketplace.json";
+import { StrategyMarketplace } from "../../anchor/types/strategy_marketplace";
 
 const PROGRAM_ID = new PublicKey(idl.address);
 const USDC_MINT = new PublicKey(process.env.NEXT_PUBLIC_USDC_MINT || "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); // Devnet USDC
