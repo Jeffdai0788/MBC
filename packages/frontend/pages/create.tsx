@@ -39,7 +39,7 @@ async function signal(polymarket) {
 }
 `;
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+const SERVER_URL = ""; // Use relative paths for Next.js API routes
 
 export default function CreateStrategy() {
     const { publicKey } = useWallet();
