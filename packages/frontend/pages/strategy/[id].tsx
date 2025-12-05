@@ -3,62 +3,68 @@ import { useRouter } from "next/router";
 import { useWallet } from "@solana/wallet-adapter-react";
 import axios from "axios";
 import bs58 from "bs58";
+import { solanaClient, StrategyData } from "../../lib/solanaClient";
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
-
-// Mock strategy data (in production, fetch from chain)
-const mockStrategy = {
-    id: "1",
-    name: "BTC Momentum Alpha",
-    description: "High-frequency momentum strategy for BTC/USDC. This strategy analyzes price momentum across multiple timeframes to identify optimal entry and exit points.",
-    creator: "7xKXn8...9mPq",
-    creatorFull: "7xKXn8mDp4qR2nYt9mPq",
-    price: 50,
-    listed: true,
-    subscribers: 28,
-    totalSignals: 142,
-    performance: "+24.5%",
-    lastMidBps: 6500,
-    upperBoundBps: 7000,
-    lowerBoundBps: 3000,
-    lastUpdate: new Date().toISOString(),
-};
 
 export default function StrategyDetail() {
     const router = useRouter();
     const { id } = router.query;
     const { publicKey, signMessage } = useWallet();
 
-    const [strategy] = useState(mockStrategy);
+    const [strategy, setStrategy] = useState<StrategyData | null>(null);
+    const [loading, setLoading] = useState(true);
     const [ownsNft, setOwnsNft] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [checkingAccess, setCheckingAccess] = useState(false);
+    const [signalLoading, setSignalLoading] = useState(false);
     const [signalData, setSignalData] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // Simulate NFT ownership check
     useEffect(() => {
-        if (publicKey) {
-            // In production, check on-chain
-            setOwnsNft(true); // For demo
+        if (id && typeof id === "string") {
+            fetchStrategy(id);
         }
-    }, [publicKey]);
+    }, [id]);
 
-    const handleBuy = async () => {
-        if (!publicKey) {
-            alert("Please connect your wallet");
-            return;
+    useEffect(() => {
+        if (publicKey && strategy) {
+            checkNftOwnership();
+        } else {
+            setOwnsNft(false);
         }
+    }, [publicKey, strategy]);
+
+    const fetchStrategy = async (pubkey: string) => {
         setLoading(true);
-        // TODO: Call smart contract to buy
-        await new Promise(r => setTimeout(r, 2000));
-        setOwnsNft(true);
-        setLoading(false);
-        alert("Strategy NFT purchased! (Demo mode)");
+        try {
+            const data = await solanaClient.getStrategy(pubkey);
+            setStrategy(data);
+        } catch (e) {
+            console.error("Error:", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const checkNftOwnership = async () => {
+        if (!publicKey || !strategy) return;
+        setCheckingAccess(true);
+        try {
+            const result = await solanaClient.checkNftBalance(
+                publicKey.toBase58(),
+                strategy.strategyMint
+            );
+            setOwnsNft(result.hasAccess);
+        } catch (e) {
+            console.error("Error:", e);
+        } finally {
+            setCheckingAccess(false);
+        }
     };
 
     const getSignal = async () => {
         if (!publicKey || !signMessage) return;
-        setLoading(true);
+        setSignalLoading(true);
         setError(null);
 
         try {
@@ -78,144 +84,158 @@ export default function StrategyDetail() {
         } catch (e: any) {
             setError(e.response?.data?.error || "Failed to fetch signal");
         } finally {
-            setLoading(false);
+            setSignalLoading(false);
         }
     };
+
+    const formatPrice = (price: number) => (price / 1_000_000).toFixed(0);
+    const shortenAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+
+    if (loading) {
+        return <p className="text-body">Loading strategy...</p>;
+    }
+
+    if (!strategy) {
+        return (
+            <div>
+                <h1 className="page-title">Not Found</h1>
+                <p className="text-body">This strategy doesn't exist.</p>
+            </div>
+        );
+    }
 
     return (
         <div>
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem" }}>
-                <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-                        <h1 className="page-title">{strategy.name}</h1>
-                        <span className="badge badge-success">{strategy.performance}</span>
-                    </div>
-                    <p className="page-subtitle">Created by {strategy.creator}</p>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                    <div className="strategy-price" style={{ fontSize: "2rem" }}>{strategy.price} USDC</div>
-                    {!ownsNft && publicKey && (
-                        <button className="btn btn-primary" onClick={handleBuy} disabled={loading} style={{ marginTop: "0.5rem" }}>
-                            {loading ? "Processing..." : "Buy Strategy NFT"}
-                        </button>
-                    )}
+            <header className="page-header">
+                <span className="text-label">Strategy {strategy.strategyId}</span>
+                <h1 className="page-title" style={{ marginBottom: "var(--space-md)" }}>
+                    {strategy.apiId || `Strategy ${strategy.strategyId}`}
+                </h1>
+                <div style={{ display: "flex", gap: "var(--space-md)", alignItems: "center" }}>
+                    <span className={`badge ${strategy.listed ? "badge-success" : "badge-warning"}`}>
+                        {strategy.listed ? "Listed" : "Unlisted"}
+                    </span>
                     {ownsNft && (
-                        <span className="badge badge-success" style={{ marginTop: "0.5rem", display: "inline-block" }}>
-                            ✓ You own this NFT
-                        </span>
+                        <span className="badge badge-success">NFT Owner</span>
                     )}
                 </div>
-            </div>
+            </header>
 
-            <div className="grid-2">
-                {/* Left Column */}
+            <div className="grid-editorial">
+                {/* Left — Details */}
                 <div>
-                    {/* Description */}
-                    <div className="card" style={{ marginBottom: "1.5rem" }}>
-                        <h2 className="card-title">About This Strategy</h2>
-                        <p style={{ color: "var(--text-secondary)", lineHeight: 1.6, marginTop: "1rem" }}>
-                            {strategy.description}
-                        </p>
+                    {/* Price */}
+                    {strategy.listed && (
+                        <div style={{ marginBottom: "var(--space-xl)" }}>
+                            <span className="text-label">Price</span>
+                            <div style={{ fontFamily: "var(--font-serif)", fontSize: "3rem", marginTop: "var(--space-xs)" }}>
+                                {formatPrice(strategy.listPrice)} <span style={{ fontSize: "1.5rem" }}>USDC</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Details */}
+                    <div className="card" style={{ marginBottom: "var(--space-lg)" }}>
+                        <div className="card-title">On-Chain Data</div>
+
+                        <div className="detail-row">
+                            <span className="detail-label">Strategy ID</span>
+                            <span className="detail-value">{strategy.strategyId}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="detail-label">Creator</span>
+                            <span className="detail-value">{shortenAddress(strategy.creator)}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="detail-label">Current Owner</span>
+                            <span className="detail-value">{shortenAddress(strategy.seller)}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="detail-label">Strategy Mint</span>
+                            <span className="detail-value">{shortenAddress(strategy.strategyMint)}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="detail-label">Payment Mint</span>
+                            <span className="detail-value">{shortenAddress(strategy.paymentMint)}</span>
+                        </div>
                     </div>
 
-                    {/* Parameters */}
+                    {/* Oracle */}
                     <div className="card">
-                        <h2 className="card-title">Strategy Parameters</h2>
-                        <div style={{ marginTop: "1rem" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid var(--border-color)" }}>
-                                <span style={{ color: "var(--text-secondary)" }}>Upper Bound</span>
-                                <span style={{ fontWeight: 600 }}>{(strategy.upperBoundBps / 100).toFixed(0)}%</span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid var(--border-color)" }}>
-                                <span style={{ color: "var(--text-secondary)" }}>Lower Bound</span>
-                                <span style={{ fontWeight: 600 }}>{(strategy.lowerBoundBps / 100).toFixed(0)}%</span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid var(--border-color)" }}>
-                                <span style={{ color: "var(--text-secondary)" }}>Current Mid Price</span>
-                                <span style={{ fontWeight: 600 }}>{(strategy.lastMidBps / 100).toFixed(2)}%</span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0" }}>
-                                <span style={{ color: "var(--text-secondary)" }}>Last Update</span>
-                                <span style={{ fontWeight: 600 }}>{new Date(strategy.lastUpdate).toLocaleString()}</span>
-                            </div>
+                        <div className="card-title">Oracle Data</div>
+
+                        <div className="detail-row">
+                            <span className="detail-label">Last Mid (bps)</span>
+                            <span className="detail-value">{strategy.lastMidBps}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="detail-label">Last Update</span>
+                            <span className="detail-value">
+                                {strategy.lastUpdateTs > 0
+                                    ? new Date(strategy.lastUpdateTs * 1000).toLocaleString()
+                                    : "Never"}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column */}
+                {/* Right — Signal */}
                 <div>
-                    {/* Stats */}
-                    <div className="card" style={{ marginBottom: "1.5rem" }}>
-                        <h2 className="card-title">Performance</h2>
-                        <div className="stat-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)", marginTop: "1rem" }}>
-                            <div className="stat-card">
-                                <div className="stat-value" style={{ color: "var(--success)" }}>{strategy.performance}</div>
-                                <div className="stat-label">ROI</div>
-                            </div>
-                            <div className="stat-card">
-                                <div className="stat-value">{strategy.subscribers}</div>
-                                <div className="stat-label">Subscribers</div>
-                            </div>
-                            <div className="stat-card">
-                                <div className="stat-value">{strategy.totalSignals}</div>
-                                <div className="stat-label">Signals Sent</div>
-                            </div>
-                            <div className="stat-card">
-                                <div className="stat-value">98%</div>
-                                <div className="stat-label">Uptime</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Signal Panel */}
                     <div className="card">
-                        <h2 className="card-title">Live Signal</h2>
+                        <div className="card-title">Live Signal</div>
 
-                        {!publicKey ? (
-                            <p style={{ color: "var(--text-secondary)", marginTop: "1rem" }}>
-                                Connect your wallet to access signals
+                        {!publicKey && (
+                            <p className="text-body">
+                                Connect wallet to access signals.
                             </p>
-                        ) : !ownsNft ? (
-                            <p style={{ color: "var(--text-secondary)", marginTop: "1rem" }}>
-                                Purchase this strategy NFT to access live signals
-                            </p>
-                        ) : (
-                            <div style={{ marginTop: "1rem" }}>
+                        )}
+
+                        {publicKey && checkingAccess && (
+                            <p className="text-body">Checking access...</p>
+                        )}
+
+                        {publicKey && !checkingAccess && !ownsNft && (
+                            <div>
+                                <p className="text-body" style={{ marginBottom: "var(--space-lg)" }}>
+                                    You need the Strategy NFT to access live signals.
+                                </p>
+                                {strategy.listed && (
+                                    <button className="btn btn-primary">
+                                        Purchase NFT
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {publicKey && ownsNft && (
+                            <div>
                                 <button
                                     className="btn btn-primary"
                                     onClick={getSignal}
-                                    disabled={loading}
-                                    style={{ width: "100%", marginBottom: "1rem" }}
+                                    disabled={signalLoading}
+                                    style={{ width: "100%", marginBottom: "var(--space-lg)" }}
                                 >
-                                    {loading ? "Fetching..." : "Get Latest Signal"}
+                                    {signalLoading ? "Fetching..." : "Get Signal"}
                                 </button>
 
                                 {error && (
-                                    <div style={{ padding: "1rem", background: "rgba(239, 68, 68, 0.1)", borderRadius: "0.5rem", color: "var(--error)" }}>
+                                    <p style={{ color: "var(--color-error)", fontSize: "0.875rem" }}>
                                         {error}
-                                    </div>
+                                    </p>
                                 )}
 
                                 {signalData && (
                                     <div className="signal-display">
-                                        <div className={`signal-indicator ${signalData.signal === "BUY_YES" ? "signal-buy" :
-                                                signalData.signal === "SELL_YES" ? "signal-sell" : "signal-hold"
-                                            }`}>
-                                            {signalData.signal === "BUY_YES" ? "📈" :
-                                                signalData.signal === "SELL_YES" ? "📉" : "⏸️"}
+                                        <div className="signal-value">
+                                            {signalData.signal}
                                         </div>
-                                        <div>
-                                            <div style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-                                                {signalData.signal}
-                                            </div>
-                                            <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-                                                {signalData.description}
-                                            </div>
-                                            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
-                                                Updated: {new Date(signalData.lastUpdate).toLocaleTimeString()}
-                                            </div>
-                                        </div>
+                                        <p className="signal-description">
+                                            {signalData.description}
+                                        </p>
+                                        <span className="signal-time">
+                                            {new Date(signalData.lastUpdate).toLocaleTimeString()}
+                                        </span>
                                     </div>
                                 )}
                             </div>

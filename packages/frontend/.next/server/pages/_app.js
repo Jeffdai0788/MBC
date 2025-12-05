@@ -99,6 +99,17 @@ module.exports = require("react/jsx-runtime");
 
 /***/ }),
 
+/***/ "styled-jsx/style":
+/*!***********************************!*\
+  !*** external "styled-jsx/style" ***!
+  \***********************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("styled-jsx/style");
+
+/***/ }),
+
 /***/ "@solana/wallet-adapter-base":
 /*!**********************************************!*\
   !*** external "@solana/wallet-adapter-base" ***!

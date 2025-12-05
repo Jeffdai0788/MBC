@@ -27,20 +27,20 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/create": [
+    "/developer": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/create.js"
+      "static/chunks/pages/developer.js"
     ],
-    "/my-strategies": [
+    "/developer/create": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/my-strategies.js"
+      "static/chunks/pages/developer/create.js"
     ],
-    "/strategy/[id]": [
+    "/developer/strategies": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/strategy/[id].js"
+      "static/chunks/pages/developer/strategies.js"
     ]
   },
   "ampFirstPages": []
