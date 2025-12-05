@@ -109,9 +109,18 @@ export class IPFSClient {
      * Mock upload for development without Pinata keys
      */
     private mockUpload(code: string): IPFSUploadResult {
-        // Generate a fake CID
-        const hash = Buffer.from(code).toString("base64").slice(0, 46);
-        const cid = `Qm${hash}`.replace(/[+/=]/g, "x");
+        // Generate a fake CID without using Buffer
+        const hashString = (str: string): string => {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(36).padStart(12, '0');
+        };
+
+        const cid = `Qm${hashString(code)}${hashString(Date.now().toString())}`;
 
         // Store in memory
         mockStorage.set(cid, { code, metadata: { mock: true } });
