@@ -1,44 +1,32 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { mockStrategies } from '../../../lib/mockStrategyData';
+import { SolanaClient } from '../../../lib/server/solanaClient';
+
+const solanaClient = new SolanaClient();
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { id } = req.query;
-
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    const { id } = req.query;
+
+    if (!id || Array.isArray(id)) {
+        return res.status(400).json({ error: 'Invalid strategy ID' });
+    }
+
     try {
-        // First check localStorage user strategies
-        // Since we can't access localStorage server-side, we'll only check mock data for now
+        const strategy = await solanaClient.getStrategy(id);
 
-        // Find strategy in mock data
-        const strategy = mockStrategies.find(s => s.id === id);
-
-        if (strategy) {
-            // Convert to blockchain format expected by the detail page
-            return res.status(200).json({
-                publicKey: `strat_${strategy.id}`,
-                strategyId: strategy.id,
-                apiId: strategy.name,
-                creator: strategy.creator,
-                strategyMint: `mint_${strategy.id}`,
-                paymentMint: "USDC_MINT_ADDRESS",
-                listed: strategy.status === "listed",
-                listPrice: strategy.listPrice * 1_000_000, // Convert to smallest unit
-                seller: strategy.creator,
-                lastMidBps: Math.floor(Math.random() * 10000),
-                lastUpdateTs: Math.floor(Date.now() / 1000),
-            });
+        if (!strategy) {
+            return res.status(404).json({ error: 'Strategy not found' });
         }
 
-        // Strategy not found
-        return res.status(404).json({ error: 'Strategy not found' });
+        res.status(200).json(strategy);
     } catch (error: any) {
-        console.error('[API] Error fetching strategy:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error('API Strategy Fetch Error:', error);
+        res.status(500).json({ error: error.message || 'Failed to fetch strategy' });
     }
 }

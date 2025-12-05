@@ -5,7 +5,7 @@ import axios from "axios";
 import bs58 from "bs58";
 import { solanaClient, StrategyData } from "../../lib/solanaClient";
 
-const SERVER_URL = "";
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
 export default function StrategyDetail() {
     const router = useRouter();

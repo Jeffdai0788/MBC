@@ -12,18 +12,12 @@ const Layout = dynamic(
     { ssr: false }
 );
 
-const TransactionExplorer = dynamic(
-    () => import("../components/TransactionExplorer"),
-    { ssr: false }
-);
-
 export default function App({ Component, pageProps }: AppProps) {
     return (
         <WalletProviderWrapper>
             <Layout>
                 <Component {...pageProps} />
             </Layout>
-            <TransactionExplorer />
         </WalletProviderWrapper>
     );
 }
