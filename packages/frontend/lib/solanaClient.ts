@@ -1,8 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
-import idl from "../../../target/idl/strategy_marketplace.json";
-import { StrategyMarketplace } from "../../../target/types/strategy_marketplace";
+import idl from "../anchor/idl/strategy_marketplace.json";
+import { StrategyMarketplace } from "../anchor/types/strategy_marketplace";
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!;
 const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
