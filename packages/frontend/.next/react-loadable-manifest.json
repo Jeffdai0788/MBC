@@ -571,6 +571,12 @@
     "id": "../../../node_modules/viem/_esm/utils/signature/recoverPublicKey.js -> @noble/curves/secp256k1",
     "files": []
   },
+  "../components/StrategyEditor.tsx -> @monaco-editor/react": {
+    "id": "../components/StrategyEditor.tsx -> @monaco-editor/react",
+    "files": [
+      "static/chunks/node_modules_monaco-editor_react_dist_index_mjs.js"
+    ]
+  },
   "_app.tsx -> ../components/Layout": {
     "id": "_app.tsx -> ../components/Layout",
     "files": [
@@ -581,6 +587,12 @@
     "id": "_app.tsx -> ../components/WalletProviderWrapper",
     "files": [
       "static/chunks/components_WalletProviderWrapper_tsx.js"
+    ]
+  },
+  "developer/create.tsx -> ../../components/StrategyEditor": {
+    "id": "developer/create.tsx -> ../../components/StrategyEditor",
+    "files": [
+      "static/chunks/components_StrategyEditor_tsx.js"
     ]
   }
 }

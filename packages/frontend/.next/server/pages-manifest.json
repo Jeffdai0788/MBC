@@ -3,7 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/strategy/[id]": "pages/strategy/[id].js",
-  "/my-strategies": "pages/my-strategies.js",
-  "/create": "pages/create.js"
+  "/developer": "pages/developer.js",
+  "/developer/create": "pages/developer/create.js",
+  "/developer/strategies": "pages/developer/strategies.js"
 }

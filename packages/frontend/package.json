@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@coral-xyz/anchor": "^0.32.1",
+        "@monaco-editor/react": "^4.7.0",
         "@solana/wallet-adapter-base": "^0.9.23",
         "@solana/wallet-adapter-react": "^0.15.35",
         "@solana/wallet-adapter-react-ui": "^0.9.35",
@@ -19,7 +20,8 @@
         "bs58": "^4.0.1",
         "next": "14.1.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "recharts": "^3.5.1"
     },
     "devDependencies": {
         "@types/node": "^20",
