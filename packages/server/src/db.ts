@@ -94,6 +94,18 @@ export async function initDatabase() {
             comment TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS created_strategies (
+            id TEXT PRIMARY KEY,
+            creator_address TEXT,
+            name TEXT,
+            description TEXT,
+            ipfs_cid TEXT,
+            category TEXT,
+            status TEXT DEFAULT 'unlisted', -- active, paused, listed, unlisted
+            list_price REAL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
     `);
 
     console.log('Database initialized at', dbPath);

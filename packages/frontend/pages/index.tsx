@@ -6,12 +6,18 @@ import StrategyCard from "../components/StrategyCard";
 import StrategyFilters, { FilterState } from "../components/StrategyFilters";
 import ComparisonModal from "../components/ComparisonModal";
 import Leaderboard from "../components/Leaderboard";
+import UserProfileModal from "../components/UserProfileModal";
 import { mockStrategies } from "../lib/mockStrategyData";
 
 export default function TraderDashboard() {
     const { publicKey } = useWallet();
     const [stats, setStats] = useState<MarketplaceStats | null>(null);
+    const [strategies, setStrategies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Profile State
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [hasProfile, setHasProfile] = useState(false);
 
     // Comparison State
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -28,16 +34,102 @@ export default function TraderDashboard() {
 
     useEffect(() => {
         fetchData();
-    }, []);
+        if (publicKey) {
+            checkProfile();
+        }
+    }, [publicKey]);
+
+    const checkProfile = async () => {
+        if (!publicKey) return;
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000"}/api/user/profile/${publicKey.toBase58()}`);
+            if (res.ok) {
+                setHasProfile(true);
+            }
+        } catch (e) {
+            console.error("Error checking profile:", e);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            // Fetch real stats from backend
+            // Fetch all strategies from API
+            const allStrategies = await solanaClient.getAllStrategies();
+
+            // Filter for listed strategies only and map to mockStrategyData format
+            const listedStrategies = allStrategies
+                .filter(s => s.listed)
+                .map(s => {
+                    // Generate deterministic mock performance based on strategy ID
+                    // This ensures the same strategy always gets the same "random" data
+                    const seed = s.strategyId.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+                    const random = (offset: number) => {
+                        const x = Math.sin(seed + offset) * 10000;
+                        return x - Math.floor(x);
+                    };
+
+                    // Generate realistic looking return
+                    const baseReturn = (random(1) * 40) - 10; // -10% to +30%
+                    const isPositive = baseReturn > 0;
+
+                    // Generate price history
+                    const history = [];
+                    let price = 100;
+                    for (let i = 0; i < 30; i++) {
+                        const change = (random(i + 10) - 0.45) * 5; // Slight upward bias
+                        price += change;
+                        history.push(price);
+                    }
+
+                    return {
+                        id: s.strategyId,
+                        name: s.apiId || `Strategy ${s.strategyId.slice(0, 8)}`,
+                        description: s.description || "Trading strategy",
+                        category: s.category || "Crypto",
+                        strategyType: "Event-Driven",
+                        returns: {
+                            "1D": baseReturn * 0.1,
+                            "5D": baseReturn * 0.3,
+                            "1W": baseReturn * 0.4,
+                            "1M": baseReturn,
+                            "1Y": baseReturn * 8,
+                            "Max": baseReturn * 10
+                        },
+                        priceHistory: {
+                            "1D": history.slice(-24),
+                            "5D": history.slice(-5),
+                            "1W": history.slice(-7),
+                            "1M": history,
+                            "1Y": history,
+                            "Max": history
+                        },
+                        riskLevel: random(2) > 0.6 ? "High" : random(2) > 0.3 ? "Medium" : "Low",
+                        sharpeRatio: 1 + random(3) * 2, // 1.0 to 3.0
+                        sortinoRatio: 1.5 + random(4) * 2,
+                        maxDrawdown: -(random(5) * 20), // 0% to -20%
+                        volatility: 10 + random(6) * 20,
+                        winRate: 0.4 + random(7) * 0.4, // 40% to 80%
+                        avgWin: 0,
+                        avgLoss: 0,
+                        bullMarketPerf: 0,
+                        bearMarketPerf: 0,
+                        creator: s.creator,
+                        subscribers: Math.floor(random(8) * 1000),
+                        listPrice: s.listPrice / 1_000_000,
+                        createdAt: new Date(s.lastUpdateTs * 1000).toISOString().split('T')[0],
+                        status: "active"
+                    };
+                });
+
+            setStrategies(listedStrategies);
+
+            // Fetch marketplace stats
             const statsData = await solanaClient.getMarketplaceStats();
             setStats(statsData);
         } catch (e) {
-            console.error("Error fetching data:", e);
+            console.error(e);
+            setStrategies([]);
         } finally {
             setLoading(false);
         }
@@ -55,11 +147,11 @@ export default function TraderDashboard() {
         }
     };
 
-    const selectedStrategies = mockStrategies.filter(s => selectedIds.includes(s.id));
+    const selectedStrategies = strategies.filter(s => selectedIds.includes(s.id));
 
     // Filter and Sort Logic
     const filteredStrategies = useMemo(() => {
-        let result = [...mockStrategies];
+        let result = [...strategies];
 
         // 1. Search
         if (filters.search) {
@@ -102,7 +194,7 @@ export default function TraderDashboard() {
         });
 
         return result;
-    }, [filters]);
+    }, [filters, strategies]);
 
     return (
         <div>
@@ -114,22 +206,6 @@ export default function TraderDashboard() {
                     Access curated Polymarket trading signals. Each strategy is tokenized as an NFT—hold it to unlock live signals.
                 </p>
             </section>
-
-            {/* Stats */}
-            <div className="stats-row">
-                <div className="stat-item">
-                    <div className="stat-value">{mockStrategies.length}</div>
-                    <div className="stat-label">Total Strategies</div>
-                </div>
-                <div className="stat-item">
-                    <div className="stat-value">{mockStrategies.filter(s => s.riskLevel === "Low").length}</div>
-                    <div className="stat-label">Low Risk</div>
-                </div>
-                <div className="stat-item">
-                    <div className="stat-value">{loading ? "—" : `$${stats?.totalVolume?.toFixed(0) || 0}`}</div>
-                    <div className="stat-label">Total Volume</div>
-                </div>
-            </div>
 
             <div className="dashboard-layout">
                 {/* Sidebar Filters */}

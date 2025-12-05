@@ -8,6 +8,7 @@ import { strategyExecutor } from "./strategyExecutor";
 import * as nacl from "tweetnacl";
 import { PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
+import { randomUUID } from "crypto";
 
 const app = express();
 app.use(express.json({ limit: "1mb" })); // Allow larger payloads for code
@@ -54,8 +55,41 @@ const verifySignature = async (req: express.Request, res: express.Response, next
 
 app.get("/api/strategies", async (req, res) => {
     try {
-        const strategies = await solanaClient.getAllStrategies();
-        res.json(strategies);
+        // 1. Fetch on-chain strategies
+        // const onChainStrategies = await solanaClient.getAllStrategies();
+        const onChainStrategies: any[] = []; // Disabled for demo to clear exchange
+
+        // 2. Fetch local DB strategies
+        const db = await getDatabase();
+        const dbStrategies = await db.all("SELECT * FROM created_strategies");
+
+        // 3. Map DB strategies to StrategyData interface
+        const localStrategies = dbStrategies.map(s => ({
+            publicKey: s.id, // Use UUID as pseudo-pubkey
+            strategyId: s.id,
+            apiId: s.name,
+            creator: s.creator_address,
+            strategyMint: "", // No mint yet
+            paymentMint: "",
+            listed: s.status === 'listed',
+            listPrice: s.list_price * 1_000_000, // Convert to units if needed, but StrategyData uses number. Assuming USDC units? solanaClient divides by 1M for display. So here we should probably store as raw units or handle consistently. Let's assume DB stores raw units or we convert.
+            // Wait, solanaClient.getMarketplaceStats divides by 1_000_000. So listPrice in StrategyData is likely in atomic units (6 decimals).
+            // If user enters 50 USDC, we should store 50 * 1M.
+            // Let's assume DB stores in MAJOR units (USDC) for readability, so we multiply by 1M here.
+            seller: s.creator_address,
+            lastMidBps: 0,
+            lastUpdateTs: Math.floor(new Date(s.created_at).getTime() / 1000),
+            // Extra fields for frontend to identify
+            isLocal: true,
+            category: s.category,
+            description: s.description,
+            status: s.status
+        }));
+
+        // 4. Merge (prefer on-chain if collision, though IDs shouldn't collide)
+        // Actually, we might want to show BOTH if they are different stages.
+        // But for now, just concat.
+        res.json([...onChainStrategies, ...localStrategies]);
     } catch (e) {
         console.error("Error fetching strategies:", e);
         res.status(500).json({ error: "Failed to fetch strategies" });
@@ -183,7 +217,7 @@ app.get("/api/polymarket/positions/:address", async (req, res) => {
 
 // ==================== STRATEGY CODE ENDPOINTS ====================
 
-// Upload strategy code to IPFS
+// Upload strategy code to IPFS and save to DB
 app.post("/api/strategy/upload", async (req, res) => {
     try {
         const { code, metadata } = req.body;
@@ -192,20 +226,67 @@ app.post("/api/strategy/upload", async (req, res) => {
             return res.status(400).json({ error: "Code is required" });
         }
 
-        const result = await ipfsClient.uploadCode(code, metadata);
+        // 1. Upload to IPFS
+        // const result = await ipfsClient.uploadCode(code, metadata);
+        const result: { success: boolean; cid: string; url: string; error?: string } = { success: true, cid: `QmLocal${randomUUID()}`, url: "" }; // Mock for local demo
 
         if (!result.success) {
             return res.status(500).json({ error: result.error || "Upload failed" });
         }
 
+        // 2. Save to DB
+        const db = await getDatabase();
+        const id = randomUUID();
+        const { name, description, creator, category } = metadata;
+
+        await db.run(
+            `INSERT INTO created_strategies (id, creator_address, name, description, ipfs_cid, category, status)
+             VALUES (?, ?, ?, ?, ?, ?, 'unlisted')`,
+            [id, creator, name, description, result.cid, category || 'Other']
+        );
+
         res.json({
             success: true,
             cid: result.cid,
-            url: result.url
+            url: result.url,
+            id: id // Return the local ID
         });
     } catch (e) {
         console.error("Error uploading strategy:", e);
         res.status(500).json({ error: "Failed to upload strategy" });
+    }
+});
+
+// List strategy for sale
+app.post("/api/strategy/list", async (req, res) => {
+    try {
+        const { strategyId, price, walletAddress } = req.body;
+
+        if (!strategyId || !price || !walletAddress) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const db = await getDatabase();
+
+        // Verify ownership
+        const strategy = await db.get("SELECT * FROM created_strategies WHERE id = ?", [strategyId]);
+        if (!strategy) {
+            return res.status(404).json({ error: "Strategy not found" });
+        }
+        if (strategy.creator_address !== walletAddress) {
+            return res.status(403).json({ error: "Unauthorized" });
+        }
+
+        // Update status and price
+        await db.run(
+            `UPDATE created_strategies SET status = 'listed', list_price = ? WHERE id = ?`,
+            [price, strategyId]
+        );
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error listing strategy:", e);
+        res.status(500).json({ error: "Failed to list strategy" });
     }
 });
 
@@ -312,14 +393,81 @@ app.get("/api/user/profile/:address", async (req, res) => {
 app.get("/api/user/portfolio/:address", async (req, res) => {
     try {
         const db = await getDatabase();
+        // Fetch both allocated strategies and bought strategies (joined with details)
         const strategies = await db.all(
-            `SELECT * FROM user_strategies WHERE user_address = ?`,
+            `SELECT 
+                us.*,
+                cs.name as apiId,
+                cs.description,
+                cs.creator_address as creator,
+                cs.status as strategyStatus,
+                cs.list_price as listPrice,
+                cs.created_at as lastUpdateTs
+             FROM user_strategies us
+             LEFT JOIN created_strategies cs ON us.strategy_id = cs.id
+             WHERE us.user_address = ?`,
             [req.params.address]
         );
-        res.json(strategies);
+
+        // Map to match frontend expectations
+        const mappedStrategies = strategies.map(s => ({
+            publicKey: s.strategy_id,
+            strategyId: s.strategy_id,
+            apiId: s.apiId,
+            creator: s.creator,
+            listed: s.strategyStatus === 'listed',
+            listPrice: s.listPrice * 1_000_000, // Convert back to atomic units for consistency
+            lastUpdateTs: Math.floor(new Date(s.lastUpdateTs).getTime() / 1000),
+            // Add other fields as needed
+            capitalAllocated: s.capital_allocated,
+            status: s.status
+        }));
+
+        res.json(mappedStrategies);
     } catch (e) {
         console.error("Error fetching portfolio:", e);
         res.status(500).json({ error: "Failed to fetch portfolio" });
+    }
+});
+
+app.post("/api/strategy/buy", async (req, res) => {
+    try {
+        const { walletAddress, strategyId, price } = req.body;
+
+        if (!walletAddress || !strategyId) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const db = await getDatabase();
+
+        // Check if already owned
+        const existing = await db.get(
+            "SELECT * FROM user_strategies WHERE user_address = ? AND strategy_id = ?",
+            [walletAddress, strategyId]
+        );
+
+        if (existing) {
+            return res.status(400).json({ error: "Strategy already owned" });
+        }
+
+        // Record purchase/allocation
+        await db.run(
+            `INSERT INTO user_strategies (user_address, strategy_id, capital_allocated, status)
+             VALUES (?, ?, 0, 'active')`,
+            [walletAddress, strategyId]
+        );
+
+        // Log activity event
+        await db.run(
+            `INSERT INTO activity_events (user_address, event_type, event_data)
+             VALUES (?, 'strategy_purchased', ?)`,
+            [walletAddress, JSON.stringify({ strategyId, price })]
+        );
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error buying strategy:", e);
+        res.status(500).json({ error: "Failed to buy strategy" });
     }
 });
 

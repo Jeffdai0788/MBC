@@ -21,11 +21,39 @@ export default function TraderPortfolio() {
         if (!publicKey) return;
         setLoading(true);
         try {
-            // For now, fetch all strategies
-            // TODO: Filter by NFT ownership once we have that check
-            const allStrategies = await solanaClient.getAllStrategies();
-            // Show strategies where user owns the NFT
-            setStrategies(allStrategies.slice(0, 2)); // Placeholder
+            // Fetch portfolio (both created and bought strategies)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000"}/api/user/portfolio/${publicKey.toBase58()}`);
+            if (res.ok) {
+                const portfolio = await res.json();
+
+                // Map to frontend format
+                const mapped = portfolio.map((s: any) => ({
+                    id: s.strategyId,
+                    name: s.apiId || `Strategy ${s.strategyId.slice(0, 8)}`,
+                    description: s.description || "Trading strategy",
+                    category: s.category || "Crypto",
+                    strategyType: "Event-Driven",
+                    returns: { "1D": 0, "5D": 0, "1W": 0, "1M": 0, "1Y": 0, "Max": 0 },
+                    priceHistory: { "1D": [], "5D": [], "1W": [], "1M": [], "1Y": [], "Max": [] },
+                    riskLevel: "Medium",
+                    sharpeRatio: 0,
+                    sortinoRatio: 0,
+                    maxDrawdown: 0,
+                    volatility: 0,
+                    winRate: 0,
+                    avgWin: 0,
+                    avgLoss: 0,
+                    bullMarketPerf: 0,
+                    bearMarketPerf: 0,
+                    creator: s.creator || s.seller || "Unknown",
+                    subscribers: 0,
+                    listPrice: s.listPrice / 1_000_000,
+                    createdAt: new Date(s.lastUpdateTs * 1000).toISOString().split('T')[0],
+                    status: s.status || "active"
+                }));
+
+                setStrategies(mapped);
+            }
         } catch (e) {
             console.error("Error fetching strategies:", e);
         } finally {

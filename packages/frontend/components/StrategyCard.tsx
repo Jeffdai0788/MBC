@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { useWallet } from "@solana/wallet-adapter-react";
 import Sparkline from "./Sparkline";
 import MetricTooltip from "./MetricTooltip";
 import { StrategyMetrics, categoryColors } from "../lib/mockStrategyData";
@@ -15,6 +16,8 @@ type TimePeriod = "1D" | "5D" | "1W" | "1M" | "1Y" | "Max";
 export default function StrategyCard({ strategy, onSelect, isSelected = false }: StrategyCardProps) {
     const [period, setPeriod] = useState<TimePeriod>("1M");
     const [isHovered, setIsHovered] = useState(false);
+    const [buying, setBuying] = useState(false);
+    const { publicKey } = useWallet();
 
     const formatPercent = (val: number) => {
         const sign = val >= 0 ? "+" : "";
@@ -29,6 +32,37 @@ export default function StrategyCard({ strategy, onSelect, isSelected = false }:
 
     const currentReturn = strategy.returns[period];
     const currentHistory = strategy.priceHistory[period];
+
+    const handleBuy = async () => {
+        if (!publicKey) {
+            alert("Please connect your wallet");
+            return;
+        }
+        setBuying(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000"}/api/strategy/buy`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    walletAddress: publicKey.toBase58(),
+                    strategyId: strategy.id,
+                    price: strategy.listPrice
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("Strategy purchased successfully!");
+                // Ideally refresh state or redirect
+            } else {
+                alert(`${data.error || "Failed to buy strategy"}\n\n(Note: This product is in demo mode)`);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error buying strategy\n\n(Note: This product is in demo mode)");
+        } finally {
+            setBuying(false);
+        }
+    };
 
     return (
         <article
@@ -103,10 +137,6 @@ export default function StrategyCard({ strategy, onSelect, isSelected = false }:
                 </div>
             </div>
 
-
-
-            // Inside StrategyCard component...
-
             {/* Key Metrics Grid */}
             <div className="metrics-grid">
                 <div className="metric-item">
@@ -136,25 +166,25 @@ export default function StrategyCard({ strategy, onSelect, isSelected = false }:
                     </MetricTooltip>
                     <span className="metric-value">{Math.round(strategy.winRate * 100)}%</span>
                 </div>
-                <div className="metric-item">
-                    <MetricTooltip
-                        label="Subscribers"
-                        description="Number of traders currently following this strategy."
-                    >
-                        <span className="metric-label">Subscribers</span>
-                    </MetricTooltip>
-                    <span className="metric-value">{strategy.subscribers}</span>
-                </div>
             </div>
 
-            {/* Footer */}
             <div className="card-footer">
                 <div className="creator-info">
                     <span className="creator-label">By</span>
-                    <span className="creator-name">{strategy.creator}</span>
+                    <span className="creator-name">{strategy.creator.slice(0, 4)}</span>
                 </div>
-                <div className="price-tag">
-                    {strategy.listPrice} USDC
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="price-tag">
+                        {strategy.listPrice} USDC
+                    </div>
+                    <button
+                        className="btn btn-primary btn-sm"
+                        onClick={handleBuy}
+                        disabled={buying}
+                        style={{ padding: "4px 12px", fontSize: "0.75rem" }}
+                    >
+                        {buying ? "..." : "Buy"}
+                    </button>
                 </div>
             </div>
 
@@ -289,7 +319,7 @@ export default function StrategyCard({ strategy, onSelect, isSelected = false }:
 
                 .metrics-grid {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
+                    grid-template-columns: repeat(3, 1fr);
                     gap: 0.5rem;
                     padding: 0.75rem 0;
                     border-top: 1px solid var(--color-paper-warm);

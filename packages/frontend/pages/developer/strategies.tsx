@@ -7,6 +7,9 @@ export default function MyStrategies() {
     const { publicKey } = useWallet();
     const [strategies, setStrategies] = useState<StrategyData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [listingStrategy, setListingStrategy] = useState<StrategyData | null>(null);
+    const [listPrice, setListPrice] = useState("");
+    const [listing, setListing] = useState(false);
 
     useEffect(() => {
         if (publicKey) {
@@ -30,6 +33,38 @@ export default function MyStrategies() {
             console.error("Error fetching strategies:", e);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleListStrategy = async () => {
+        if (!listingStrategy || !listPrice || !publicKey) return;
+
+        setListing(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000"}/api/strategy/list`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    strategyId: listingStrategy.strategyId, // Use the ID (UUID for local)
+                    price: parseFloat(listPrice),
+                    walletAddress: publicKey.toBase58()
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to list strategy");
+            }
+
+            // Refresh list
+            await fetchMyStrategies();
+            setListingStrategy(null);
+            setListPrice("");
+        } catch (e) {
+            console.error("Error listing strategy:", e);
+            alert("Failed to list strategy");
+        } finally {
+            setListing(false);
         }
     };
 
@@ -57,14 +92,9 @@ export default function MyStrategies() {
 
     return (
         <div>
-            <header className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                    <span className="text-label">Your Strategies</span>
-                    <h1 className="page-title">Portfolio</h1>
-                </div>
-                <Link href="/developer/create" className="btn btn-secondary">
-                    New Strategy
-                </Link>
+            <header className="page-header">
+                <span className="text-label">Your Strategies</span>
+                <h1 className="page-title">Portfolio</h1>
             </header>
 
             {/* Stats */}
@@ -116,7 +146,7 @@ export default function MyStrategies() {
                             <tr key={strategy.publicKey}>
                                 <td>
                                     <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.125rem" }}>
-                                        {strategy.apiId || `Strategy ${strategy.strategyId}`}
+                                        {strategy.apiId || `Strategy ${strategy.strategyId.slice(0, 8)}`}
                                     </div>
                                     <div className="text-mono" style={{ color: "var(--color-stone)", marginTop: "4px" }}>
                                         {shortenAddress(strategy.publicKey)}
@@ -136,15 +166,91 @@ export default function MyStrategies() {
                                         : "Never"}
                                 </td>
                                 <td style={{ textAlign: "right" }}>
-                                    <Link href={`/strategy/${strategy.publicKey}`} className="btn btn-secondary" style={{ padding: "0.5rem 1rem" }}>
-                                        View
-                                    </Link>
+                                    {strategy.listed ? (
+                                        <Link href={`/strategy/${strategy.publicKey}`} className="btn btn-secondary" style={{ padding: "0.5rem 1rem" }}>
+                                            View
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            className="btn btn-primary"
+                                            style={{ padding: "0.5rem 1rem", fontSize: "0.75rem" }}
+                                            onClick={() => setListingStrategy(strategy)}
+                                        >
+                                            List for Sale
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             )}
+
+            {/* Listing Modal */}
+            {listingStrategy && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h3 style={{ marginBottom: "var(--space-md)" }}>List Strategy</h3>
+                        <p className="text-body" style={{ marginBottom: "var(--space-lg)" }}>
+                            Set a price for <strong>{listingStrategy.apiId || "your strategy"}</strong>.
+                        </p>
+
+                        <div className="form-group">
+                            <label className="form-label">Price (USDC)</label>
+                            <input
+                                type="number"
+                                className="form-input"
+                                placeholder="100"
+                                value={listPrice}
+                                onChange={(e) => setListPrice(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-xl)" }}>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => {
+                                    setListingStrategy(null);
+                                    setListPrice("");
+                                }}
+                                disabled={listing}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleListStrategy}
+                                disabled={listing || !listPrice}
+                            >
+                                {listing ? "Listing..." : "Confirm Listing"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style jsx>{`
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 100;
+                }
+                .modal {
+                    background: var(--color-cream);
+                    padding: var(--space-xl);
+                    width: 100%;
+                    max-width: 400px;
+                    border: 1px solid var(--color-paper-warm);
+                }
+            `}</style>
         </div>
     );
 }

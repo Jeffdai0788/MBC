@@ -18,6 +18,10 @@ export interface StrategyData {
     seller: string;
     lastMidBps: number;
     lastUpdateTs: number;
+    // Extra fields from local DB
+    description?: string;
+    category?: string;
+    status?: string;
 }
 
 export interface MarketplaceStats {

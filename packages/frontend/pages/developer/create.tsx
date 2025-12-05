@@ -49,7 +49,7 @@ export default function CreateStrategy() {
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        price: "",
+        category: "",
     });
     const [code, setCode] = useState(DEFAULT_CODE);
     const [testing, setTesting] = useState(false);
@@ -57,7 +57,7 @@ export default function CreateStrategy() {
     const [uploading, setUploading] = useState(false);
     const [uploadResult, setUploadResult] = useState<{ cid?: string; error?: string } | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
@@ -90,7 +90,7 @@ export default function CreateStrategy() {
         setUploadResult(null);
 
         try {
-            // 1. Upload code to IPFS
+            // 1. Upload code to IPFS and Create Strategy in DB
             const uploadRes = await fetch(`${SERVER_URL}/api/strategy/upload`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -99,6 +99,7 @@ export default function CreateStrategy() {
                     metadata: {
                         name: formData.name,
                         description: formData.description,
+                        category: formData.category,
                         creator: publicKey.toBase58()
                     }
                 })
@@ -112,11 +113,13 @@ export default function CreateStrategy() {
 
             setUploadResult({ cid: uploadData.cid });
 
-            // 2. TODO: Call smart contract to create strategy with IPFS hash
-            // For now, show success with CID
-            alert(`Strategy uploaded to IPFS!\nCID: ${uploadData.cid}\n\nSmart contract integration coming soon.`);
+            // Show native popup as requested
+            window.alert(`Strategy uploaded to IPFS!\nCID: ${uploadData.cid}\n\nSmart contract integration coming soon.`);
 
-            // router.push("/my-strategies");
+            // Redirect after short delay
+            setTimeout(() => {
+                router.push("/developer/strategies");
+            }, 500);
 
         } catch (e: any) {
             setUploadResult({ error: e.message || "Failed to create strategy" });
@@ -127,7 +130,7 @@ export default function CreateStrategy() {
 
     const canProceed = () => {
         if (step === "info") {
-            return formData.name && formData.description && formData.price;
+            return formData.name && formData.description && formData.category;
         }
         if (step === "code") {
             return code.length > 0;
@@ -195,6 +198,25 @@ export default function CreateStrategy() {
                     </div>
 
                     <div className="form-group">
+                        <label className="form-label">Category</label>
+                        <select
+                            name="category"
+                            className="form-input"
+                            value={formData.category}
+                            onChange={handleChange}
+                            style={{ appearance: "none", background: "transparent" }}
+                        >
+                            <option value="">Select a category</option>
+                            <option value="AI">AI</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Politics">Politics</option>
+                            <option value="Crypto">Crypto</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Weather">Weather</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
                         <label className="form-label">Description</label>
                         <textarea
                             name="description"
@@ -203,21 +225,6 @@ export default function CreateStrategy() {
                             value={formData.description}
                             onChange={handleChange}
                             rows={4}
-                        />
-                    </div>
-
-                    <div className="divider" />
-
-                    <div className="form-group">
-                        <label className="form-label">List Price (USDC)</label>
-                        <input
-                            type="number"
-                            name="price"
-                            className="form-input"
-                            placeholder="50"
-                            value={formData.price}
-                            onChange={handleChange}
-                            min="1"
                         />
                     </div>
 
@@ -273,14 +280,14 @@ export default function CreateStrategy() {
                             <span className="detail-value">{formData.name}</span>
                         </div>
                         <div className="detail-row">
+                            <span className="detail-label">Category</span>
+                            <span className="detail-value">{formData.category}</span>
+                        </div>
+                        <div className="detail-row">
                             <span className="detail-label">Description</span>
                             <span className="detail-value" style={{ maxWidth: "300px" }}>
                                 {formData.description}
                             </span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Price</span>
-                            <span className="detail-value">{formData.price} USDC</span>
                         </div>
                         <div className="detail-row">
                             <span className="detail-label">Code Size</span>
@@ -306,7 +313,7 @@ export default function CreateStrategy() {
                             marginBottom: "var(--space-lg)"
                         }}>
                             <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
-                                ✓ Uploaded to IPFS
+                                ✓ Strategy Created!
                             </div>
                             <div className="text-mono" style={{ fontSize: "0.75rem", wordBreak: "break-all" }}>
                                 CID: {uploadResult.cid}
@@ -318,16 +325,16 @@ export default function CreateStrategy() {
                         <button
                             className="btn btn-secondary"
                             onClick={() => setStep("code")}
-                            disabled={uploading}
+                            disabled={uploading || !!uploadResult?.cid}
                         >
                             Back
                         </button>
                         <button
                             className="btn btn-primary"
                             onClick={handleUploadAndCreate}
-                            disabled={uploading}
+                            disabled={uploading || !!uploadResult?.cid}
                         >
-                            {uploading ? "Creating..." : "Create Strategy NFT"}
+                            {uploading ? "Creating..." : uploadResult?.cid ? "Done" : "Create Strategy"}
                         </button>
                     </div>
                 </div>
