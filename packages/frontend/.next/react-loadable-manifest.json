@@ -571,6 +571,12 @@
     "id": "../../../node_modules/viem/_esm/utils/signature/recoverPublicKey.js -> @noble/curves/secp256k1",
     "files": []
   },
+  "_app.tsx -> ../components/Layout": {
+    "id": "_app.tsx -> ../components/Layout",
+    "files": [
+      "static/chunks/components_Layout_tsx.js"
+    ]
+  },
   "_app.tsx -> ../components/WalletProviderWrapper": {
     "id": "_app.tsx -> ../components/WalletProviderWrapper",
     "files": [

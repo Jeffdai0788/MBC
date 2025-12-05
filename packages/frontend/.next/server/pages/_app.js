@@ -19,7 +19,7 @@ exports.modules = {
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ App)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"react/jsx-dev-runtime\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var next_dynamic__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! next/dynamic */ \"../../node_modules/next/dynamic.js\");\n/* harmony import */ var next_dynamic__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(next_dynamic__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _styles_globals_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/globals.css */ \"./styles/globals.css\");\n/* harmony import */ var _styles_globals_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_styles_globals_css__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n// Dynamically import wallet providers to avoid SSR issues\nconst WalletProviderWrapper = next_dynamic__WEBPACK_IMPORTED_MODULE_1___default()(()=>Promise.all(/*! import() */[__webpack_require__.e(\"vendor-chunks/@solana\"), __webpack_require__.e(\"components_WalletProviderWrapper_tsx\")]).then(__webpack_require__.bind(__webpack_require__, /*! ../components/WalletProviderWrapper */ \"./components/WalletProviderWrapper.tsx\")), {\n    loadableGenerated: {\n        modules: [\n            \"_app.tsx -> \" + \"../components/WalletProviderWrapper\"\n        ]\n    },\n    ssr: false\n});\nfunction App({ Component, pageProps }) {\n    return /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(WalletProviderWrapper, {\n        children: /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(Component, {\n            ...pageProps\n        }, void 0, false, {\n            fileName: \"/Users/jeffdai/Solana-Hackathon-2025/Solana-Hackathon-2025/packages/frontend/pages/_app.tsx\",\n            lineNumber: 14,\n            columnNumber: 13\n        }, this)\n    }, void 0, false, {\n        fileName: \"/Users/jeffdai/Solana-Hackathon-2025/Solana-Hackathon-2025/packages/frontend/pages/_app.tsx\",\n        lineNumber: 13,\n        columnNumber: 9\n    }, this);\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9wYWdlcy9fYXBwLnRzeCIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OztBQUNtQztBQUNKO0FBRS9CLDBEQUEwRDtBQUMxRCxNQUFNQyx3QkFBd0JELG1EQUFPQSxDQUNqQyxJQUFNLG9SQUE2Qzs7Ozs7O0lBQ2pERSxLQUFLOztBQUdJLFNBQVNDLElBQUksRUFBRUMsU0FBUyxFQUFFQyxTQUFTLEVBQVk7SUFDMUQscUJBQ0ksOERBQUNKO2tCQUNHLDRFQUFDRztZQUFXLEdBQUdDLFNBQVM7Ozs7Ozs7Ozs7O0FBR3BDIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vQHN0cmF0ZWd5LW1hcmtldHBsYWNlL2Zyb250ZW5kLy4vcGFnZXMvX2FwcC50c3g/MmZiZSJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IEFwcFByb3BzIH0gZnJvbSBcIm5leHQvYXBwXCI7XG5pbXBvcnQgZHluYW1pYyBmcm9tIFwibmV4dC9keW5hbWljXCI7XG5pbXBvcnQgXCIuLi9zdHlsZXMvZ2xvYmFscy5jc3NcIjtcblxuLy8gRHluYW1pY2FsbHkgaW1wb3J0IHdhbGxldCBwcm92aWRlcnMgdG8gYXZvaWQgU1NSIGlzc3Vlc1xuY29uc3QgV2FsbGV0UHJvdmlkZXJXcmFwcGVyID0gZHluYW1pYyhcbiAgICAoKSA9PiBpbXBvcnQoXCIuLi9jb21wb25lbnRzL1dhbGxldFByb3ZpZGVyV3JhcHBlclwiKSxcbiAgICB7IHNzcjogZmFsc2UgfVxuKTtcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gQXBwKHsgQ29tcG9uZW50LCBwYWdlUHJvcHMgfTogQXBwUHJvcHMpIHtcbiAgICByZXR1cm4gKFxuICAgICAgICA8V2FsbGV0UHJvdmlkZXJXcmFwcGVyPlxuICAgICAgICAgICAgPENvbXBvbmVudCB7Li4ucGFnZVByb3BzfSAvPlxuICAgICAgICA8L1dhbGxldFByb3ZpZGVyV3JhcHBlcj5cbiAgICApO1xufVxuIl0sIm5hbWVzIjpbImR5bmFtaWMiLCJXYWxsZXRQcm92aWRlcldyYXBwZXIiLCJzc3IiLCJBcHAiLCJDb21wb25lbnQiLCJwYWdlUHJvcHMiXSwic291cmNlUm9vdCI6IiJ9\n//# sourceURL=webpack-internal:///./pages/_app.tsx\n");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ App)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"react/jsx-dev-runtime\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var next_dynamic__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! next/dynamic */ \"../../node_modules/next/dynamic.js\");\n/* harmony import */ var next_dynamic__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(next_dynamic__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _styles_globals_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/globals.css */ \"./styles/globals.css\");\n/* harmony import */ var _styles_globals_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_styles_globals_css__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\nconst WalletProviderWrapper = next_dynamic__WEBPACK_IMPORTED_MODULE_1___default()(()=>Promise.all(/*! import() */[__webpack_require__.e(\"vendor-chunks/@solana\"), __webpack_require__.e(\"components_WalletProviderWrapper_tsx\")]).then(__webpack_require__.bind(__webpack_require__, /*! ../components/WalletProviderWrapper */ \"./components/WalletProviderWrapper.tsx\")), {\n    loadableGenerated: {\n        modules: [\n            \"_app.tsx -> \" + \"../components/WalletProviderWrapper\"\n        ]\n    },\n    ssr: false\n});\nconst Layout = next_dynamic__WEBPACK_IMPORTED_MODULE_1___default()(()=>Promise.all(/*! import() */[__webpack_require__.e(\"vendor-chunks/next\"), __webpack_require__.e(\"components_Layout_tsx\")]).then(__webpack_require__.bind(__webpack_require__, /*! ../components/Layout */ \"./components/Layout.tsx\")), {\n    loadableGenerated: {\n        modules: [\n            \"_app.tsx -> \" + \"../components/Layout\"\n        ]\n    },\n    ssr: false\n});\nfunction App({ Component, pageProps }) {\n    return /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(WalletProviderWrapper, {\n        children: /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(Layout, {\n            children: /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(Component, {\n                ...pageProps\n            }, void 0, false, {\n                fileName: \"/Users/jeffdai/Solana-Hackathon-2025/Solana-Hackathon-2025/packages/frontend/pages/_app.tsx\",\n                lineNumber: 19,\n                columnNumber: 17\n            }, this)\n        }, void 0, false, {\n            fileName: \"/Users/jeffdai/Solana-Hackathon-2025/Solana-Hackathon-2025/packages/frontend/pages/_app.tsx\",\n            lineNumber: 18,\n            columnNumber: 13\n        }, this)\n    }, void 0, false, {\n        fileName: \"/Users/jeffdai/Solana-Hackathon-2025/Solana-Hackathon-2025/packages/frontend/pages/_app.tsx\",\n        lineNumber: 17,\n        columnNumber: 9\n    }, this);\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9wYWdlcy9fYXBwLnRzeCIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OztBQUNtQztBQUNKO0FBRS9CLE1BQU1DLHdCQUF3QkQsbURBQU9BLENBQ2pDLElBQU0sb1JBQTZDOzs7Ozs7SUFDakRFLEtBQUs7O0FBR1gsTUFBTUMsU0FBU0gsbURBQU9BLENBQ2xCLElBQU0sb09BQThCOzs7Ozs7SUFDbENFLEtBQUs7O0FBR0ksU0FBU0UsSUFBSSxFQUFFQyxTQUFTLEVBQUVDLFNBQVMsRUFBWTtJQUMxRCxxQkFDSSw4REFBQ0w7a0JBQ0csNEVBQUNFO3NCQUNHLDRFQUFDRTtnQkFBVyxHQUFHQyxTQUFTOzs7Ozs7Ozs7Ozs7Ozs7O0FBSXhDIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vQHN0cmF0ZWd5LW1hcmtldHBsYWNlL2Zyb250ZW5kLy4vcGFnZXMvX2FwcC50c3g/MmZiZSJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IEFwcFByb3BzIH0gZnJvbSBcIm5leHQvYXBwXCI7XG5pbXBvcnQgZHluYW1pYyBmcm9tIFwibmV4dC9keW5hbWljXCI7XG5pbXBvcnQgXCIuLi9zdHlsZXMvZ2xvYmFscy5jc3NcIjtcblxuY29uc3QgV2FsbGV0UHJvdmlkZXJXcmFwcGVyID0gZHluYW1pYyhcbiAgICAoKSA9PiBpbXBvcnQoXCIuLi9jb21wb25lbnRzL1dhbGxldFByb3ZpZGVyV3JhcHBlclwiKSxcbiAgICB7IHNzcjogZmFsc2UgfVxuKTtcblxuY29uc3QgTGF5b3V0ID0gZHluYW1pYyhcbiAgICAoKSA9PiBpbXBvcnQoXCIuLi9jb21wb25lbnRzL0xheW91dFwiKSxcbiAgICB7IHNzcjogZmFsc2UgfVxuKTtcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gQXBwKHsgQ29tcG9uZW50LCBwYWdlUHJvcHMgfTogQXBwUHJvcHMpIHtcbiAgICByZXR1cm4gKFxuICAgICAgICA8V2FsbGV0UHJvdmlkZXJXcmFwcGVyPlxuICAgICAgICAgICAgPExheW91dD5cbiAgICAgICAgICAgICAgICA8Q29tcG9uZW50IHsuLi5wYWdlUHJvcHN9IC8+XG4gICAgICAgICAgICA8L0xheW91dD5cbiAgICAgICAgPC9XYWxsZXRQcm92aWRlcldyYXBwZXI+XG4gICAgKTtcbn1cbiJdLCJuYW1lcyI6WyJkeW5hbWljIiwiV2FsbGV0UHJvdmlkZXJXcmFwcGVyIiwic3NyIiwiTGF5b3V0IiwiQXBwIiwiQ29tcG9uZW50IiwicGFnZVByb3BzIl0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///./pages/_app.tsx\n");
 
 /***/ }),
 
@@ -63,6 +63,17 @@ module.exports = require("next/dist/compiled/next-server/pages.runtime.dev.js");
 
 "use strict";
 module.exports = require("react");
+
+/***/ }),
+
+/***/ "react-dom":
+/*!****************************!*\
+  !*** external "react-dom" ***!
+  \****************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("react-dom");
 
 /***/ }),
 
@@ -129,6 +140,39 @@ module.exports = import("@solana/wallet-adapter-react-ui");;
 
 "use strict";
 module.exports = import("@solana/wallet-adapter-wallets");;
+
+/***/ }),
+
+/***/ "fs":
+/*!*********************!*\
+  !*** external "fs" ***!
+  \*********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs");
+
+/***/ }),
+
+/***/ "stream":
+/*!*************************!*\
+  !*** external "stream" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("stream");
+
+/***/ }),
+
+/***/ "zlib":
+/*!***********************!*\
+  !*** external "zlib" ***!
+  \***********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("zlib");
 
 /***/ })
 

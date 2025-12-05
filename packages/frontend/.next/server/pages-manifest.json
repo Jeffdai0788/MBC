@@ -2,5 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js"
+  "/": "pages/index.js",
+  "/strategy/[id]": "pages/strategy/[id].js",
+  "/my-strategies": "pages/my-strategies.js",
+  "/create": "pages/create.js"
 }
