@@ -81,6 +81,14 @@ export function useStrategyTransactions() {
         }
     };
 
-},
-            };
-        }
+    return {
+        createStrategy,
+        buyStrategy,
+        listStrategy,
+        states: {
+            create: createState,
+            buy: buyState,
+            list: listState,
+        },
+    };
+}
