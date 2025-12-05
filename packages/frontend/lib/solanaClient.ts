@@ -2,6 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
 
+
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!;
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
