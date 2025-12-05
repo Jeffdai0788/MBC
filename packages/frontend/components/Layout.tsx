@@ -73,10 +73,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             />
                             <span className="nav-partner-divider">×</span>
                             <img
-                                src="/images/solana.svg"
+                                src="/images/solana-gradient.png"
                                 alt="Solana"
-                                width={24}
                                 height={24}
+                                style={{ height: "24px", width: "auto" }}
                             />
                         </div>
 
@@ -105,7 +105,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         </button>
                     </div>
 
-                    {/* Right: Nav Links + Wallet */}
+                    {/* Right: Nav Links + Settings + Wallet */}
                     <div className="nav-right">
                         <div className="nav-links">
                             {navLinks.map((link) => (
@@ -118,6 +118,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                 </Link>
                             ))}
                         </div>
+                        {publicKey && (
+                            <Link
+                                href={`/profile/${publicKey.toBase58()}`}
+                                className="profile-btn"
+                                title="View Profile"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="10" cy="6" r="3" stroke="currentColor" strokeWidth="1.5" />
+                                    <path d="M4 16C4 13.2386 6.23858 11 9 11H11C13.7614 11 16 13.2386 16 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                </svg>
+                            </Link>
+                        )}
                         <WalletMultiButton />
                     </div>
                 </nav>
@@ -125,6 +137,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <main className="main">
                     {children}
                 </main>
+
+                {/* User Profile Modal removed - now part of profile page */}
             </div>
 
             <style jsx>{`
@@ -151,6 +165,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     color: var(--color-cream);
                 }
                 .mode-btn:hover:not(.active) {
+                    color: var(--color-ink);
+                }
+                .profile-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: none;
+                    border: none;
+                    padding: 0.5rem;
+                    cursor: pointer;
+                    color: var(--color-stone);
+                    transition: color 0.2s ease;
+                }
+                .profile-btn:hover {
                     color: var(--color-ink);
                 }
             `}</style>

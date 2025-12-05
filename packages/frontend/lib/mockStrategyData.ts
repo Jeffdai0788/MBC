@@ -47,6 +47,7 @@ export interface StrategyMetrics {
     subscribers: number;
     listPrice: number;
     createdAt: string;
+    status: "active" | "paused" | "listed" | "unlisted";
 }
 
 // Generate realistic price history
@@ -93,6 +94,7 @@ export const mockStrategies: StrategyMetrics[] = [
         subscribers: 342,
         listPrice: 150,
         createdAt: "2024-01-15",
+        status: "active",
     },
     {
         id: "strat-2",
@@ -123,6 +125,7 @@ export const mockStrategies: StrategyMetrics[] = [
         subscribers: 567,
         listPrice: 200,
         createdAt: "2024-03-22",
+        status: "paused",
     },
     {
         id: "strat-3",
@@ -153,6 +156,7 @@ export const mockStrategies: StrategyMetrics[] = [
         subscribers: 892,
         listPrice: 75,
         createdAt: "2023-11-08",
+        status: "active",
     },
     {
         id: "strat-4",
@@ -183,6 +187,7 @@ export const mockStrategies: StrategyMetrics[] = [
         subscribers: 1245,
         listPrice: 250,
         createdAt: "2024-06-01",
+        status: "listed",
     },
     {
         id: "strat-5",
@@ -213,6 +218,7 @@ export const mockStrategies: StrategyMetrics[] = [
         subscribers: 2156,
         listPrice: 50,
         createdAt: "2023-08-15",
+        status: "unlisted",
     },
     {
         id: "strat-6",
@@ -243,6 +249,7 @@ export const mockStrategies: StrategyMetrics[] = [
         subscribers: 423,
         listPrice: 100,
         createdAt: "2024-02-28",
+        status: "active",
     },
 ];
 

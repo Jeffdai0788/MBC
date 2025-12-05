@@ -257,6 +257,227 @@ app.get("/api/strategy/code/:cid", async (req, res) => {
     }
 });
 
+// ==================== USER PROFILE & PORTFOLIO ENDPOINTS ====================
+
+import { initDatabase, getDatabase } from "./db";
+import { profileService } from "./profileService";
+
+// Initialize DB on startup
+initDatabase().catch(console.error);
+
+app.post("/api/user/profile", async (req, res) => {
+    try {
+        const { walletAddress, apiKey, secret, passphrase } = req.body;
+        if (!walletAddress || !apiKey || !secret || !passphrase) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const db = await getDatabase();
+        await db.run(
+            `INSERT OR REPLACE INTO users (wallet_address, polymarket_api_key, polymarket_secret, polymarket_passphrase)
+             VALUES (?, ?, ?, ?)`,
+            [walletAddress, apiKey, secret, passphrase]
+        );
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error updating profile:", e);
+        res.status(500).json({ error: "Failed to update profile" });
+    }
+});
+
+app.get("/api/user/profile/:address", async (req, res) => {
+    try {
+        const db = await getDatabase();
+        const user = await db.get(
+            "SELECT wallet_address, created_at FROM users WHERE wallet_address = ?",
+            [req.params.address]
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({
+            walletAddress: user.wallet_address,
+            hasApiKeys: true, // We don't return the actual keys
+            createdAt: user.created_at
+        });
+    } catch (e) {
+        console.error("Error fetching profile:", e);
+        res.status(500).json({ error: "Failed to fetch profile" });
+    }
+});
+
+app.get("/api/user/portfolio/:address", async (req, res) => {
+    try {
+        const db = await getDatabase();
+        const strategies = await db.all(
+            `SELECT * FROM user_strategies WHERE user_address = ?`,
+            [req.params.address]
+        );
+        res.json(strategies);
+    } catch (e) {
+        console.error("Error fetching portfolio:", e);
+        res.status(500).json({ error: "Failed to fetch portfolio" });
+    }
+});
+
+app.post("/api/user/strategy/allocate", async (req, res) => {
+    try {
+        const { walletAddress, strategyId, amount, action } = req.body; // action: 'allocate' or 'pause'
+
+        const db = await getDatabase();
+
+        if (action === 'pause') {
+            await db.run(
+                `UPDATE user_strategies SET status = 'paused' WHERE user_address = ? AND strategy_id = ?`,
+                [walletAddress, strategyId]
+            );
+        } else {
+            await db.run(
+                `INSERT OR REPLACE INTO user_strategies (user_address, strategy_id, capital_allocated, status)
+                 VALUES (?, ?, ?, 'active')`,
+                [walletAddress, strategyId, amount]
+            );
+        }
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error allocating capital:", e);
+        res.status(500).json({ error: "Failed to update strategy allocation" });
+    }
+});
+
+// ==================== SOCIAL PROFILE ENDPOINTS ====================
+
+app.get("/api/profile/:address", async (req, res) => {
+    try {
+        const profile = await profileService.getProfile(req.params.address);
+        if (!profile) {
+            return res.status(404).json({ error: "Profile not found" });
+        }
+        res.json(profile);
+    } catch (e) {
+        console.error("Error fetching profile:", e);
+        res.status(500).json({ error: "Failed to fetch profile" });
+    }
+});
+
+app.post("/api/profile/update", async (req, res) => {
+    try {
+        const { walletAddress, username, bio, avatarUrl, privacySetting } = req.body;
+        const db = await getDatabase();
+
+        await db.run(
+            `INSERT OR REPLACE INTO user_profiles (wallet_address, username, bio, avatar_url, privacy_setting)
+             VALUES (?, ?, ?, ?, ?)`,
+            [walletAddress, username, bio, avatarUrl, privacySetting || 'public']
+        );
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error updating profile:", e);
+        res.status(500).json({ error: "Failed to update profile" });
+    }
+});
+
+app.get("/api/profile/:address/trader-stats", async (req, res) => {
+    try {
+        const stats = await profileService.getTraderStats(req.params.address);
+        res.json(stats);
+    } catch (e) {
+        console.error("Error fetching trader stats:", e);
+        res.status(500).json({ error: "Failed to fetch trader stats" });
+    }
+});
+
+app.get("/api/profile/:address/developer-stats", async (req, res) => {
+    try {
+        const stats = await profileService.getDeveloperStats(req.params.address);
+        res.json(stats);
+    } catch (e) {
+        console.error("Error fetching developer stats:", e);
+        res.status(500).json({ error: "Failed to fetch developer stats" });
+    }
+});
+
+app.get("/api/profile/:address/activity", async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit as string) || 20;
+        const activity = await profileService.getActivityFeed(req.params.address, limit);
+        res.json(activity);
+    } catch (e) {
+        console.error("Error fetching activity:", e);
+        res.status(500).json({ error: "Failed to fetch activity" });
+    }
+});
+
+app.post("/api/social/follow", async (req, res) => {
+    try {
+        const { followerAddress, followingAddress } = req.body;
+        const db = await getDatabase();
+
+        await db.run(
+            `INSERT OR IGNORE INTO social_connections (follower_address, following_address)
+             VALUES (?, ?)`,
+            [followerAddress, followingAddress]
+        );
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error following user:", e);
+        res.status(500).json({ error: "Failed to follow user" });
+    }
+});
+
+app.delete("/api/social/unfollow/:address", async (req, res) => {
+    try {
+        const { followerAddress } = req.body;
+        const db = await getDatabase();
+
+        await db.run(
+            `DELETE FROM social_connections WHERE follower_address = ? AND following_address = ?`,
+            [followerAddress, req.params.address]
+        );
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error unfollowing user:", e);
+        res.status(500).json({ error: "Failed to unfollow user" });
+    }
+});
+
+app.get("/api/social/followers/:address", async (req, res) => {
+    try {
+        const followers = await profileService.getFollowers(req.params.address);
+        res.json(followers);
+    } catch (e) {
+        console.error("Error fetching followers:", e);
+        res.status(500).json({ error: "Failed to fetch followers" });
+    }
+});
+
+app.get("/api/social/following/:address", async (req, res) => {
+    try {
+        const following = await profileService.getFollowing(req.params.address);
+        res.json(following);
+    } catch (e) {
+        console.error("Error fetching following:", e);
+        res.status(500).json({ error: "Failed to fetch following" });
+    }
+});
+
+app.get("/api/social/is-following/:follower/:following", async (req, res) => {
+    try {
+        const isFollowing = await profileService.isFollowing(req.params.follower, req.params.following);
+        res.json({ isFollowing });
+    } catch (e) {
+        console.error("Error checking follow status:", e);
+        res.status(500).json({ error: "Failed to check follow status" });
+    }
+});
+
 // ==================== SERVER START ====================
 
 app.listen(PORT, async () => {
