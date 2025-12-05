@@ -112,11 +112,45 @@ export default function CreateStrategy() {
 
             setUploadResult({ cid: uploadData.cid });
 
-            // 2. TODO: Call smart contract to create strategy with IPFS hash
-            // For now, show success with CID
-            alert(`Strategy uploaded to IPFS!\nCID: ${uploadData.cid}\n\nSmart contract integration coming soon.`);
+            // 2. Save to localStorage so it appears on Discover page
+            const newStrategy = {
+                id: `user-strat-${Date.now()}`,
+                name: formData.name,
+                description: formData.description,
+                category: "Finance", // Default category
+                strategyType: "Custom",
+                riskLevel: "Medium",
+                returns: { "1D": 0, "1W": 0, "1M": 0, "3M": 0, "1Y": 0, "ALL": 0 },
+                sharpeRatio: 0,
+                maxDrawdown: 0,
+                totalTrades: 0,
+                priceHistory: [100],
+                winRate: 0,
+                avgWin: 0,
+                avgLoss: 0,
+                bullMarketPerf: 0,
+                bearMarketPerf: 0,
+                creator: publicKey.toBase58(),
+                subscribers: 0,
+                listPrice: parseFloat(formData.price) || 0,
+                createdAt: new Date().toISOString(),
+                status: "active",
+                ipfsCid: uploadData.cid
+            };
 
-            // router.push("/my-strategies");
+            try {
+                const storedStrategies = localStorage.getItem('userCreatedStrategies');
+                const strategies = storedStrategies ? JSON.parse(storedStrategies) : [];
+                strategies.push(newStrategy);
+                localStorage.setItem('userCreatedStrategies', JSON.stringify(strategies));
+            } catch (e) {
+                console.error('Error saving to localStorage:', e);
+            }
+
+            alert(`Strategy created successfully!\nCID: ${uploadData.cid}\n\nYour strategy is now visible on the Discover page.`);
+
+            // Redirect to home
+            router.push("/");
 
         } catch (e: any) {
             setUploadResult({ error: e.message || "Failed to create strategy" });
