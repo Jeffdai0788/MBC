@@ -17,7 +17,6 @@ export function useStrategyTransactions() {
     const [createState, setCreateState] = useState<TransactionState>({ loading: false, error: null, signature: null });
     const [buyState, setBuyState] = useState<TransactionState>({ loading: false, error: null, signature: null });
     const [listState, setListState] = useState<TransactionState>({ loading: false, error: null, signature: null });
-    const [unlistState, setUnlistState] = useState<TransactionState>({ loading: false, error: null, signature: null });
 
     const createStrategy = async (params: CreateStrategyParams) => {
         if (!wallet || !publicKey) {
@@ -82,37 +81,6 @@ export function useStrategyTransactions() {
         }
     };
 
-    const unlistStrategy = async (strategyPublicKey: PublicKey) => {
-        if (!wallet || !publicKey) {
-            throw new Error("Wallet not connected");
+},
+            };
         }
-
-        setUnlistState({ loading: true, error: null, signature: null });
-
-        try {
-            const txBuilder = new StrategyTransactions(connection, wallet);
-            const { transaction } = await txBuilder.unlistStrategy(strategyPublicKey);
-            const signature = await txBuilder.sendTransaction(transaction);
-
-            setUnlistState({ loading: false, error: null, signature });
-            return { signature };
-        } catch (error: any) {
-            const errorMsg = error.message || "Unlisting failed";
-            setUnlistState({ loading: false, error: errorMsg, signature: null });
-            throw error;
-        }
-    };
-
-    return {
-        createStrategy,
-        buyStrategy,
-        listStrategy,
-        unlistStrategy,
-        states: {
-            create: createState,
-            buy: buyState,
-            list: listState,
-            unlist: unlistState,
-        },
-    };
-}

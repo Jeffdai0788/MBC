@@ -150,31 +150,6 @@ export class StrategyTransactions {
     }
 
     /**
-     * Unlist a strategy
-     */
-    async unlistStrategy(strategyPublicKey: PublicKey) {
-        const strategyAccount = await this.program.account.strategy.fetch(strategyPublicKey);
-        const strategyMint = strategyAccount.strategyMint as PublicKey;
-
-        const sellerNftAta = await getAssociatedTokenAddress(strategyMint, this.wallet.publicKey);
-        const escrowNftAta = await getAssociatedTokenAddress(strategyMint, strategyPublicKey, true);
-
-        const tx = await this.program.methods
-            .unlistStrategy()
-            .accounts({
-                seller: this.wallet.publicKey,
-                strategy: strategyPublicKey,
-                strategyMint,
-                sellerNftAta,
-                escrowNftAta,
-                tokenProgram: TOKEN_PROGRAM_ID,
-            } as any)
-            .transaction();
-
-        return { transaction: tx };
-    }
-
-    /**
      * Send and confirm transaction
      */
     async sendTransaction(transaction: Transaction) {
