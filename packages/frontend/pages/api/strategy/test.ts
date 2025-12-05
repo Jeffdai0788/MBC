@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { strategyExecutor } from '../../../../lib/server/strategyExecutor';
+import { strategyExecutor } from '../../../lib/server/strategyExecutor';
 
 export default async function handler(
     req: NextApiRequest,

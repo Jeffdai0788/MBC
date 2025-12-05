@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ipfsClient } from '../../../../lib/server/ipfsClient';
+import { ipfsClient } from '../../../lib/server/ipfsClient';
 
 export default async function handler(
     req: NextApiRequest,
