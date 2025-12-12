@@ -2,7 +2,6 @@
 
 PolyStrategies is the world's first decentralized marketplace for algorithmic trading strategies, built on Solana. We are pioneering the era of **Algorithmic Markets**, where trading logic itself—not just the asset it trades—becomes a tradable asset class.
 
-![PolyStrategies Hero](https://via.placeholder.com/800x400?text=PolyStrategies+Dashboard)
 
 ## The Vision: Democratizing Algorithmic Trading
 
