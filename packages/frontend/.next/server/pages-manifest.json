@@ -4,8 +4,5 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/developer": "pages/developer.js",
-  "/portfolio": "pages/portfolio.js",
-  "/developer/strategies": "pages/developer/strategies.js",
-  "/developer/create": "pages/developer/create.js",
-  "/profile/[address]": "pages/profile/[address].js"
+  "/api/strategies": "pages/api/strategies.js"
 }
